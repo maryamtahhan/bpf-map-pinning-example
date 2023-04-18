@@ -27,6 +27,11 @@ image: ## Build docker image
 
 .PHONY: del-kind
 del-kind: ## Remove a kind cluster called bpf-map-pinning-deployment
+ifeq ($(docker ps -a | grep bpf-map-pinning-deployment-worker | wc -l ), 1)
+	docker exec bpf-map-pinning-deployment-worker umount /tmp/bpf-map/
+else ifeq ($( docker ps -a | grep bpf-map-pinning-deployment-worker2 | wc -l ), 1)
+	docker exec bpf-map-pinning-deployment-worker umount /tmp/bpf-map/
+endif
 	kind delete cluster --name bpf-map-pinning-deployment
 	rm -rf /tmp/bpf-map/
 	rm -rf /tmp/bpf-map2/
@@ -35,17 +40,24 @@ del-kind: ## Remove a kind cluster called bpf-map-pinning-deployment
 setup-kind: del-kind ## Setup a kind cluster called bpf-map-pinning-deployment
 	mkdir -p /tmp/bpf-map/
 	mkdir -p /tmp/bpf-map2/
-	kind create cluster --config kind/kind-config.yaml --name bpf-map-pinning-deployment
+	kind create cluster --config kind/kind-config.yaml
 
 .PHONY: kind-deploy
-kind-deploy: image ## Deploy the example kind cluster
-	@echo "****** Deploy Daemonset  ******"
+kind-load: image ## Load the image in the kind cluster
+	@echo "****** Load bpfmap image  ******"
 	@echo
 	kind load --name bpf-map-pinning-deployment docker-image bpfmap
-	kubectl create -f ./deployments/daemonset-kind.yaml
 	@echo
 	@echo
 
+.PHONY: label-kind-node
+label-kind-node: ## label the kind worker nodes with bpfexample="true"
+	kubectl label node bpf-map-pinning-deployment-worker bpfexample=true
+
 .PHONY: run-on-kind
-run-on-kind: del-kind setup-kind kind-deploy ## Run the example kind cluster
+run-on-kind: del-kind image setup-kind kind-load label-kind-node ## Run the example kind cluster
+	docker exec bpf-map-pinning-deployment-worker mount bpffs /tmp/bpf-map/ -t bpf
+	docker exec bpf-map-pinning-deployment-worker2 mount bpffs /tmp/bpf-map/ -t bpf
+	docker exec bpf-map-pinning-deployment-worker sysctl kernel.unprivileged_bpf_disabled=0
+	docker exec bpf-map-pinning-deployment-worker2 sysctl kernel.unprivileged_bpf_disabled=0
 	@echo "******       Kind Setup complete       ******"

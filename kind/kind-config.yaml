@@ -1,15 +1,19 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+name: bpf-map-pinning-deployment
 
 nodes:
 - role: control-plane
+  # name: bpf-map-pinning-cp
 - role: worker
+  # name: bpf-map-pinning-worker1
   extraMounts:
   - hostPath: /tmp/bpf-map/
     containerPath: /tmp/bpf-map/
     propagation: Bidirectional
     selinuxRelabel: false
 - role: worker
+  # name: bpf-map-pinning-worker2
   extraMounts:
   - hostPath: /tmp/bpf-map2/
     containerPath: /tmp/bpf-map/

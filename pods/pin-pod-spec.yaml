@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bpfmap-pin-pod                              # Pod name
+spec:
+  nodeSelector:
+    bpfexample: "true"
+  containers:
+  - name: bpfmap-pin
+    image: bpfmap:latest                 # Specify your docker image here, along with PullPolicy and command
+    imagePullPolicy: IfNotPresent
+    command: ["./tests/pin_bpf_map.py"]
+    securityContext:
+      capabilities:
+        add:
+          - BPF
+    volumeMounts:
+      - mountPath: /var/run/example/map/
+        name: test-volume
+  volumes:
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /tmp/bpf-map/
+      # this field is optional
+      type: Directory
+  restartPolicy: Never
