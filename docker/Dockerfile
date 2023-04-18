@@ -13,7 +13,7 @@ RUN apk --no-cache -U add gcc \
 	libc-dev \
 	linux-headers
 
-env PYTHONPATH /pybpfmap/pybpfmap:$PYTHONPATH
+env PYTHONPATH /pybpfmap:$PYTHONPATH
 
 RUN pip3 install "cython>=3.0.0b2"
 RUN pip3 install nose3

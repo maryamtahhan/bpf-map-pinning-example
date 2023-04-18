@@ -1,9 +1,4 @@
 #!/usr/bin/python3
-
-
-'''BPF Map functional test
-'''
-
 # pybpfmap, Copyright (c) 2023 RedHat Inc
 # pybpfmap, Copyright (c) 2023 Cambridge Greys Ltd
 
@@ -13,13 +8,14 @@
 # You may select, at your option, one of the above-listed licenses.
 
 import sys
-import os
 
 from pybpfmap.bpfrecord import PinnedBPFMap
 
 def main():
-    m = PinnedBPFMap("/var/run/example/map/test-map")
-    if (m.fd < 0):
+    # m = PinnedBPFMap(bytes("/var/run/example/map/test-map".encode("ascii")))
+
+    b = PinnedBPFMap("/var/run/example/map/test-map".encode("ascii"))
+    if (b is None):
         print("Error retrieving the map")
         sys.exit(0)
     print("MAP retrieved")

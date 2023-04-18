@@ -10,6 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+worker-running=$(shell docker container inspect -f '{{.State.Status}}' bpf-map-pinning-deployment-worker)
+worker2-running=$(shell docker container inspect -f '{{.State.Status}}' bpf-map-pinning-deployment-worker2)
 
 .PHONY: help all
 help: ## Display this help.
@@ -19,7 +21,7 @@ all: image
 
 ##@ General Build - assumes K8s environment is already setup
 image: ## Build docker image
-	@echo "******  docker Image    ******"
+	@echo "******  docker Image  ******"
 	@echo
 	docker build -t bpfmap -f docker/Dockerfile .
 	@echo
@@ -27,10 +29,12 @@ image: ## Build docker image
 
 .PHONY: del-kind
 del-kind: ## Remove a kind cluster called bpf-map-pinning-deployment
-ifeq ($(docker ps -a | grep bpf-map-pinning-deployment-worker | wc -l ), 1)
+	@echo "******  Cleanup  ******"
+ifeq ($(worker-running), running)
 	docker exec bpf-map-pinning-deployment-worker umount /tmp/bpf-map/
-else ifeq ($( docker ps -a | grep bpf-map-pinning-deployment-worker2 | wc -l ), 1)
-	docker exec bpf-map-pinning-deployment-worker umount /tmp/bpf-map/
+endif
+ifeq ($(worker2-running), running)
+	docker exec bpf-map-pinning-deployment-worker2 umount /tmp/bpf-map/
 endif
 	kind delete cluster --name bpf-map-pinning-deployment
 	rm -rf /tmp/bpf-map/

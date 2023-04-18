@@ -1,9 +1,4 @@
 #!/usr/bin/python3
-
-
-'''BPF Map functional test
-'''
-
 # pybpfmap, Copyright (c) 2023 RedHat Inc
 # pybpfmap, Copyright (c) 2023 Cambridge Greys Ltd
 
