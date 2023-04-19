@@ -15,6 +15,8 @@ contains two examples:
 1. A simple example that pins a BPF map.
 2. A simple example that accesses a pinned BPF map.
 
+Both examples use the pybpfmap python package available from https://github.com/kot-begemot-uk/pybpfmap.git
+
 To run the kind cluster with the example pods please use the following:
 
 ```bash
