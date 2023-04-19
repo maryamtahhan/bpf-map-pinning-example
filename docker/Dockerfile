@@ -19,7 +19,8 @@ RUN pip3 install "cython>=3.0.0b2"
 RUN pip3 install nose3
 RUN git clone https://github.com/kot-begemot-uk/pybpfmap.git
 WORKDIR pybpfmap/pybpfmap
-RUN git checkout fc6db0c
+RUN git pull
+RUN git checkout a689da4cce832d867c1b967039556c687244f425
 #RUN python3 setup.py build_ext -i
 RUN pip3 install -e .
 RUN sed -i 's/nosetests3/nosetests/g' Makefile
