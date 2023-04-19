@@ -19,8 +19,8 @@ help: ## Display this help.
 
 all: image
 
-##@ General Build - assumes K8s environment is already setup
-image: ## Build docker image
+##@ General Build
+image: ## Build docker image called bpfmap
 	@echo "******  docker Image  ******"
 	@echo
 	docker build -t bpfmap -f docker/Dockerfile .
@@ -28,7 +28,7 @@ image: ## Build docker image
 	@echo
 
 .PHONY: del-kind
-del-kind: ## Remove a kind cluster called bpf-map-pinning-deployment
+del-kind: ## Delete a kind cluster called bpf-map-pinning-deployment
 	@echo "******  Cleanup  ******"
 ifeq ($(worker-running), running)
 	docker exec bpf-map-pinning-deployment-worker umount /tmp/bpf-map/
@@ -47,7 +47,7 @@ setup-kind: del-kind ## Setup a kind cluster called bpf-map-pinning-deployment
 	kind create cluster --config kind/kind-config.yaml
 
 .PHONY: kind-deploy
-kind-load: image ## Load the image in the kind cluster
+kind-load: image ## Load the bpfmap image onto the kind cluster nodes
 	@echo "****** Load bpfmap image  ******"
 	@echo
 	kind load --name bpf-map-pinning-deployment docker-image bpfmap
@@ -55,13 +55,16 @@ kind-load: image ## Load the image in the kind cluster
 	@echo
 
 .PHONY: label-kind-node
-label-kind-node: ## label the kind worker nodes with bpfexample="true"
+label-kind-node: ## Label the kind worker nodes with bpfexample="true"
 	kubectl label node bpf-map-pinning-deployment-worker bpfexample=true
 
-.PHONY: run-on-kind
-run-on-kind: del-kind image setup-kind kind-load label-kind-node ## Run the example kind cluster
+.PHONY: create-bpffs
+create-bpffs: ## Create the bpffs in the worker nodes
 	docker exec bpf-map-pinning-deployment-worker mount bpffs /tmp/bpf-map/ -t bpf
 	docker exec bpf-map-pinning-deployment-worker2 mount bpffs /tmp/bpf-map/ -t bpf
+
+.PHONY: run-on-kind
+run-on-kind: del-kind image setup-kind kind-load label-kind-node create-bpffs ## Build the image, setup kind cluster and nodes
 	docker exec bpf-map-pinning-deployment-worker sysctl kernel.unprivileged_bpf_disabled=0
 	docker exec bpf-map-pinning-deployment-worker2 sysctl kernel.unprivileged_bpf_disabled=0
 	@echo "******       Kind Setup complete       ******"

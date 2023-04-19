@@ -1,5 +1,16 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) Red Hat Inc.
+#!/bin/bash
+# Copyright(c) Red Hat Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 FROM amd64/alpine:3.17
 
@@ -21,7 +32,6 @@ RUN git clone https://github.com/kot-begemot-uk/pybpfmap.git
 WORKDIR pybpfmap/pybpfmap
 RUN git pull
 RUN git checkout a689da4cce832d867c1b967039556c687244f425
-#RUN python3 setup.py build_ext -i
 RUN pip3 install -e .
 RUN sed -i 's/nosetests3/nosetests/g' Makefile
 COPY docker/pin_bpf_map.py /pybpfmap/pybpfmap/tests
@@ -31,5 +41,3 @@ RUN chmod +x /pybpfmap/pybpfmap/tests/get_bpf_map.py
 RUN mkdir -p /var/run/example/map/
 COPY docker/bpffs.sh /pybpfmap/pybpfmap/
 RUN chmod +x /pybpfmap/pybpfmap/bpffs.sh
-# On startup run the bpffs.sh script then run ./tests/pin_bpf_map.py
-#
